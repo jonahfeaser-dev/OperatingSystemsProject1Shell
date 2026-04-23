@@ -1,5 +1,5 @@
 
-# Unix Shell
+# Unix Shell from Operating Systems: Three Easy Steps
 
 In this project, you'll build a simple Unix shell. The shell is the heart of
 the command-line interface, and thus is central to the Unix/C programming
