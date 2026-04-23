@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-
+#include <sys/wait.h>
 
 char *paths[500];
 int pathCount = 0;
@@ -59,43 +59,45 @@ void handlePath(int arguments, char *input[]) {
   }
 }
 
+char searchPath[500];
+
 int handleSearch(int arguments, char *input[]) {
   
   if(pathCount <= 0) {
     fprintf(stderr, "An error has occurred\n");
-    return 0;
+    return 1;
   }
-
-  char searchPath[500];
   int commandFound = 0;
   for(int i = 0; i < pathCount; i++) {
     sprintf(searchPath, "%s/%s", paths[i], input[0]);
   
     if(access(searchPath, X_OK) == 0) {
-      
       commandFound = 1;
-    
-      int pc = fork();
-
-      if(pc < 0) {
-        printf("Fork failed to occur\n");
-        exit(1); 
-      } else if(pc == 0) {
-    
-        execv(searchPath, input);
-        fprintf(stderr, "An error has occurred\n");
-        exit(1);
-
-      } else {
-        return pc;
-      }
+      break;
     }
   }
-
   if(commandFound != 1) {
     fprintf(stderr, "An error has occurred\n");
-    return 0;
+    return 1;
   }
   return 0;
 }
+
+int executeCommand(char *input[]) {
+  int pc = fork();
+
+  if(pc < 0) {
+    printf("Fork failed to occur\n");
+    exit(1);
+    } else if(pc == 0) {
+    execv(searchPath, input);
+    fprintf(stderr, "An error has occurred\n");
+    exit(1);
+    } else {
+      wait(NULL);
+      return pc;
+    }
+  return 0;
+}
+
 
